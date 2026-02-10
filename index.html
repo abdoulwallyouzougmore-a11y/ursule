@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Éclosion Éternelle - Dina</title>
+    <style>
+        :root { --rouge: #ff4d6d; --violet: #7b2cbf; --noir: #0a0008; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--noir); font-family: 'serif'; color: white; overflow-x: hidden; }
+        
+        /* Verrouillage */
+        #lock-screen { position: fixed; inset: 0; background: radial-gradient(circle, #2d001e, #000); display: flex; justify-content: center; align-items: center; z-index: 100; transition: 1.5s; }
+        .lock-box { text-align: center; padding: 40px; border-radius: 20px; border: 1px solid var(--violet); background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); }
+        input { padding: 12px; border-radius: 20px; border: 1px solid var(--violet); background: black; color: white; text-align: center; outline: none; }
+        
+        /* Contenu */
+        #main-content { display: none; flex-direction: column; align-items: center; padding: 20px; }
+        .bg-hearts { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: -1; opacity: 0.1; }
+        .heart-shape { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--rouge); width: 300px; height: 300px; clip-path: path('M150 240c-100-80-150-130-150-180 0-40 30-70 70-70 25 0 45 15 60 35 15-20 35-35 60-35 40 0 70 30 70 70 0 50-50 100-150 180z'); }
+        .heart-outer { width: 600px; height: 600px; background: var(--violet); opacity: 0.2; }
+        
+        .layout { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; margin-top: 20px; }
+        video { width: 320px; border-radius: 15px; border: 2px solid var(--violet); }
+        .letter { max-width: 700px; padding: 30px; line-height: 1.8; text-align: center; font-style: italic; }
+        button#replay { display: none; margin-top: 10px; padding: 8px 15px; background: none; border: 1px solid var(--rouge); color: var(--rouge); border-radius: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <div class="lock-box">
+            <h2 style="color:var(--rouge)">Secret de Dina</h2>
+            <input type="password" id="pass" placeholder="Mot de passe...">
+            <br><br>
+            <button onclick="unlock()" style="background:var(--rouge); border:none; color:white; padding:10px 20px; border-radius:20px; cursor:pointer;">Ouvrir</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="bg-hearts">
+            <div class="heart-shape heart-outer"></div>
+            <div class="heart-shape"></div>
+        </div>
+        <h1 style="color:var(--rouge)">DINA JE T'AIME</h1>
+        <div class="layout">
+            <div style="text-align:center;">
+                <canvas id="treeCanvas" width="500" height="500"></canvas>
+                <br>
+                <button id="replay" onclick="initGrowth()">Faire renaître notre amour</button>
+            </div>
+            <video id="v" loop><source src="WhatsApp Video 2026-02-09 at 17.33.02.mp4" type="video/mp4"></video>
+        </div>
+        <div class="letter">
+            Ma chère DINA, En regardant cet arbre dont chaque feuille est un cœur... Je t'aime aujourd'hui, demain, et pour toujours.
+        </div>
+    </div>
+
+    <audio id="m" loop><source src="rebola.mp3" type="audio/mpeg"></audio>
+
+    <script>
+        const canvas = document.getElementById('treeCanvas');
+        const ctx = canvas.getContext('2d');
+        let limit = 0;
+
+        function unlock() {
+            if(document.getElementById('pass').value === "alphaorigine") {
+                document.getElementById('lock-screen').style.opacity = "0";
+                setTimeout(() => {
+                    document.getElementById('lock-screen').style.display = "none";
+                    document.getElementById('main-content').style.display = "flex";
+                    document.getElementById('v').play();
+                    document.getElementById('m').play();
+                    initGrowth();
+                }, 1500);
+            }
+        }
+
+        function drawHeart(x, y, s, c) {
+            ctx.save(); ctx.beginPath(); ctx.translate(x, y); ctx.rotate(Math.PI);
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-s, -s, -s*2, s/2, 0, s*1.5);
+            ctx.bezierCurveTo(s*2, s/2, s, -s, 0, 0);
+            ctx.fillStyle = c; ctx.fill(); ctx.restore();
+        }
+
+        function branch(x, y, len, angle, w, d) {
+            if (d > limit) return;
+            ctx.beginPath(); ctx.save();
+            ctx.strokeStyle = d > 7 ? '#7b2cbf' : '#2d1424';
+            ctx.lineWidth = w; ctx.translate(x, y); ctx.rotate(angle * Math.PI / 180);
+            ctx.moveTo(0, 0); ctx.lineTo(0, -len); ctx.stroke();
+            if (len < 10) {
+                drawHeart(0, -len, 5, Math.random() > 0.5 ? '#ff4d6d' : '#9d4edd');
+                ctx.restore(); return;
+            }
+            branch(0, -len, len * 0.76, angle - 22, w * 0.7, d + 1);
+            branch(0, -len, len * 0.76, angle + 22, w * 0.7, d + 1);
+            ctx.restore();
+        }
+
+        function initGrowth() {
+            limit = 0;
+            document.getElementById('replay').style.display = "none";
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, 500, 500);
+            branch(250, 480, 90, 0, 15, 0);
+            if (limit < 12) {
+                limit += 0.05;
+                requestAnimationFrame(animate);
+            } else {
+                document.getElementById('replay').style.display = "inline-block";
+                ctx.fillStyle = "white"; ctx.fillText("DINA JE T'AIME", 320, 460);
+            }
+        }
+    </script>
+</body>
+</html>
